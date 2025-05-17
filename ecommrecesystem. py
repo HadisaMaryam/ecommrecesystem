@@ -1,1 +1,111 @@
+class Product:
+    def __init__(self, product_id, name, price, 
+        self.product_id = product_id
+        self.name = name
+        self.price = price
+        self.stock = stock
+
+    def update_stock(self, quantity):
+        self.stock += quantity
+
+    def __str__(self):
+        return f"{self.name} (ID: {self.product_id}) - ${self.price}, Stock: {self.stock}"
+
+
+class ShoppingCart:
+    def __init__(self):
+        self.cart = {}
+
+    def add_to_cart(self, product, quantity):
+        if product.stock >= quantity:
+            if product.product_id in self.cart:
+                self.cart[product.product_id]['quantity'] += quantity
+            else:
+                self.cart[product.product_id] = {'product': product, 'quantity': quantity}
+            product.update_stock(-quantity)
+        else:
+            print(f"Not enough stock for {product.name}.")
+
+    def remove_from_cart(self, product_id, quantity):
+        if product_id in self.cart:
+            item = self.cart[product_id]
+            if item['quantity'] <= quantity:
+                item['product'].update_stock(item['quantity'])
+                del self.cart[product_id]
+            else:
+                item['quantity'] -= quantity
+                item['product'].update_stock(quantity)
+        else:
+            print("Product not in cart.")
+
+    def view_cart(self):
+        if not self.cart:
+            print("Your cart is empty.")
+        else:
+            for item in self.cart.values():
+                product = item['product']
+                quantity = item['quantity']
+                print(f"{product.name} - Quantity: {quantity}, Total: ${product.price * quantity}")
+
+    def checkout(self):
+        if not self.cart:
+            print("Your cart is empty.")
+        else:
+            total = sum(item['product'].price * item['quantity'] for item in self.cart.values())
+            print(f"Total amount: ${total}")
+            self.cart.clear()
+
+
+class ECommerceSystem:
+    def __init__(self):
+        self.products = []
+        self.cart = ShoppingCart()
+
+    def add_product(self, product):
+        self.products.append(product)
+
+    def list_products(self):
+        if not self.products:
+            print("No products available.")
+        else:
+            for product in self.products:
+                print(product)
+
+    def find_product(self, product_id):
+        for product in self.products:
+            if product.product_id == product_id:
+                return product
+        return None
+
+
+# Example usage
+if __name__ == "__main__":
+    system = ECommerceSystem()
+
+    # Adding products
+    system.add_product(Product(1, "Laptop", 1200, 10))
+    system.add_product(Product(2, "Phone", 800, 20))
+    system.add_product(Product(3, "Headphones", 150, 50))
+
+    # Listing products
+    print("Available Products:")
+    system.list_products()
+
+    # Adding to cart
+    print("\nAdding to cart:")
+    product = system.find_product(1)
+    if product:
+        system.cart.add_to_cart(product, 2)
+
+    product = system.find_product(3)
+    if product:
+        system.cart.add_to_cart(product, 1)
+
+    # Viewing cart
+    print("\nYour Cart:")
+    system.cart.view_cart()
+
+    # Checkout
+    print("\nCheckout:")
+    system.cart.checkout()
 
